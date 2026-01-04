@@ -1,0 +1,6 @@
+@HorizonteAzulApi_HostAddress = https://localhost:7080
+
+GET {{HorizonteAzulApi_HostAddress}}/WeatherForecast/GetWeatherForecast
+Accept: application/json
+
+###

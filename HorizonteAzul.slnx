@@ -1,1 +1,7 @@
-<Solution />
+<Solution>
+  <Folder Name="/Backend/">
+    <Project Path="HorizonteAzulApi/HorizonteAzulApi.csproj" />
+  </Folder>
+  <Folder Name="/Frontend/" />
+  <Folder Name="/Mobile/" />
+</Solution>
