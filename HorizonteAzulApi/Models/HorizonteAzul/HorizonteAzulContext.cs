@@ -14,6 +14,7 @@ namespace HorizonteAzulApi.Models.HorizonteAzul
         }
 
         public DbSet<Usuario> Usuario { get; set; }
+        public DbSet<TipoUsuario> TipoUsuario { get; set; }
         public DbSet<SituacaoUsuario> SituacaoUsuario { get; set; }
         public DbSet<Sessao> Sessao { get; set; }
     }
