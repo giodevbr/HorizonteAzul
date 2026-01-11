@@ -1,10 +1,16 @@
 using HorizonteAzulApi.Extensions.Interfaces;
 using HorizonteAzulApi.Extensions.Services;
+using HorizonteAzulApi.Models.HorizonteAzul;
+using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
+using System;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
+
+var connectionString = builder.Configuration.GetConnectionString("HorizonteAzulConnection");
+builder.Services.AddDbContext<HorizonteAzulContext>(options => options.UseSqlServer(connectionString));
 
 builder.Services.AddScoped<INotificadorDominio, NotificadorDominio>();
 builder.Services.AddCors(policy =>
@@ -14,6 +20,7 @@ builder.Services.AddCors(policy =>
                                                              .AllowAnyHeader()));
 
 var app = builder.Build();
+
 app.MapOpenApi();
 app.MapScalarApiReference("/scalar", options =>
 {
