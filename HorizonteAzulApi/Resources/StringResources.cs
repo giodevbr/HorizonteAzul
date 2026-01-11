@@ -15,6 +15,9 @@
             return FormatarResource(principal, args.Select(x => x.ToLower()).ToArray());
         }
 
+        public const string HorizonteAzulConnection = "HorizonteAzulConnection";
+        public const string JwtKeyNaoConfigurado = "Jwt:Key não está configurado";
+
         public const string NenhumRegistroEncontrado = "Nenhum Registro Encontrado.";
     }
 }
