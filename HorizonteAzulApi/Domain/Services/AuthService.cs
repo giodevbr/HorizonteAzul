@@ -1,5 +1,11 @@
-﻿using HorizonteAzulApi.Models.HorizonteAzul;
+﻿using HorizonteAzulApi.Data.Interfaces;
+using HorizonteAzulApi.Data.Models.HorizonteAzul;
+using HorizonteAzulApi.Domain.Interfaces;
+using HorizonteAzulApi.Enums;
+using HorizonteAzulApi.Extensions.Interfaces;
 using HorizonteAzulApi.Resources;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -7,38 +13,78 @@ using System.Text;
 
 namespace HorizonteAzulApi.Domain.Services
 {
-    public class AuthService
+    public class AuthService : IAuthService
     {
+        private readonly INotificadorDominio _notificadorDominio;
+        private readonly IUsuarioRepository _usuarioRepository;
         private readonly IConfiguration _configuration;
+
         private readonly string _jwtKey;
 
-        public AuthService(IConfiguration configuration)
+        public AuthService(IConfiguration configuration, INotificadorDominio notificadorDominio, IUsuarioRepository usuarioRepository)
         {
+            _notificadorDominio = notificadorDominio;
+            _usuarioRepository = usuarioRepository;
             _configuration = configuration;
+
             _jwtKey = _configuration["Jwt:Key"] ?? throw new InvalidOperationException(StringResources.JwtKeyNaoConfigurado);
         }
 
-        public string GenerateToken(Usuario usuario)
+        public async Task<string?> AutenticarAsync(string email, string senha)
+        {
+            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(senha))
+                _notificadorDominio.AdicionarNotificacao(StringResources.EmailOuSenhaInvalidos);
+
+            if (_notificadorDominio.VerificarOperacao())
+            {
+                var usuario = await _usuarioRepository.ObterPorEmailAsync(email);
+
+                if (usuario == null)
+                    _notificadorDominio.AdicionarNotificacao(StringResources.EmailOuSenhaInvalidos);
+
+                if (_notificadorDominio.VerificarOperacao() && usuario != null)
+                {
+                    var hasher = new PasswordHasher<Usuario>();
+
+                    if (hasher.VerifyHashedPassword(usuario, usuario.Senha, senha) == PasswordVerificationResult.Success)
+                    {
+                        if (usuario.SituacaoUsuarioId != ESituacaoUsuario.ATIVO.GetHashCode())
+                            _notificadorDominio.AdicionarNotificacao(StringResources.UsuarioNaoEstaAtivo);
+                        else
+                            return GerarToken(usuario);
+                    }
+                    else
+                    {
+                        _notificadorDominio.AdicionarNotificacao(StringResources.EmailOuSenhaInvalidos);
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        private string GerarToken(Usuario usuario)
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtKey));
-            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha512);
 
-            var claims = new[]
+            var tokenDescriptor = new SecurityTokenDescriptor
             {
-                new Claim(JwtRegisteredClaimNames.Sub, "user.Email"),
-                new Claim(ClaimTypes.NameIdentifier, "user.Id.ToString()"),
-                new Claim(ClaimTypes.Role, "getUserType(user.UserType)")
+                Subject = new ClaimsIdentity([
+                    new Claim(JwtRegisteredClaimNames.Sub, usuario.Email),
+                    new Claim(ClaimTypes.Name, usuario.Nome),
+                    new Claim(ClaimTypes.NameIdentifier, usuario.UsuarioId.ToString()),
+                    new Claim(ClaimTypes.Role, usuario.TipoUsuario.Descricao)
+                ]),
+
+                Expires = DateTime.UtcNow.AddMinutes(30),
+                SigningCredentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha512Signature)
             };
 
-            var token = new JwtSecurityToken(
-                issuer: _configuration["Jwt:Issuer"],
-                audience: _configuration["Jwt:Audience"],
-                claims: claims,
-                expires: DateTime.Now.AddMinutes(30),
-                signingCredentials: credentials
-            );
+            var tokenHandler = new JwtSecurityTokenHandler();
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+
+            return tokenHandler.WriteToken(token);
         }
     }
 }

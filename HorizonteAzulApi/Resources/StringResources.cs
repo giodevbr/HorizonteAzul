@@ -19,5 +19,7 @@
         public const string JwtKeyNaoConfigurado = "Jwt:Key não está configurado";
 
         public const string NenhumRegistroEncontrado = "Nenhum Registro Encontrado.";
+        public const string EmailOuSenhaInvalidos = "Email ou senha inválidos.";
+        public const string UsuarioNaoEstaAtivo = "O Usuário não está ativo, contate o administrador do sistema.";
     }
 }

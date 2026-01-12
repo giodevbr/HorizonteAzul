@@ -1,4 +1,4 @@
-﻿using HorizonteAzulApi.Models.HorizonteAzul;
+﻿using HorizonteAzulApi.Data.Models.HorizonteAzul;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore.Migrations;
 

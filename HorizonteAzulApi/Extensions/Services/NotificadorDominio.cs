@@ -18,7 +18,7 @@ namespace HorizonteAzulApi.Extensions.Services
 
         public bool VerificarOperacao()
         {
-            return _notificacoes.Count > 0;
+            return _notificacoes.Count == 0;
         }
 
         public void AdicionarNotificacao(string notificacao)

@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace HorizonteAzulApi.Models.HorizonteAzul
+namespace HorizonteAzulApi.Data.Models.HorizonteAzul
 {
     public class HorizonteAzulContext(DbContextOptions<HorizonteAzulContext> options) : DbContext(options)
     {

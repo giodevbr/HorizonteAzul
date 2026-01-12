@@ -1,4 +1,4 @@
-﻿namespace HorizonteAzulApi.Models.HorizonteAzul
+﻿namespace HorizonteAzulApi.Data.Models.HorizonteAzul
 {
     #nullable disable
     public class SituacaoUsuario

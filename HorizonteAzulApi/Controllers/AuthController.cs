@@ -1,21 +1,25 @@
-﻿using HorizonteAzulApi.Domain.Dtos;
+﻿using HorizonteAzulApi.Domain.Interfaces;
 using HorizonteAzulApi.Extensions;
 using HorizonteAzulApi.Extensions.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HorizonteAzulApi.Controllers
 {
-
-    public class AuthController(INotificadorDominio notificadorDominio) : BaseController(notificadorDominio)
+    public class AuthController(INotificadorDominio notificadorDominio, IAuthService authService) : BaseController(notificadorDominio)
     {
+        private readonly IAuthService _authService = authService;
+
         [HttpGet(Name = "Login")]
-        [ProducesResponseType(typeof(UsuarioDto), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
-        [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(typeof(List<string>), StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> Login()
+        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(List<string>), StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> Login(string email, string senha)
         {
-            return Ok("Login successful");
+            var retorno = await _authService.AutenticarAsync(email, senha);
+
+            if (!_notificadorDominio.VerificarOperacao())
+                return UnauthorizedResponse();
+
+            return Ok(retorno);
         }
     }
 }

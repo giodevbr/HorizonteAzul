@@ -21,6 +21,11 @@ namespace HorizonteAzulApi.Extensions
             return BadRequest(_notificadorDominio.ObterNotificacoes().Distinct());
         }
 
+        protected UnauthorizedObjectResult UnauthorizedResponse()
+        {
+            return Unauthorized(_notificadorDominio.ObterNotificacoes().Distinct());
+        }
+
         protected NotFoundObjectResult NotFoundRequestResponse()
         {
             return NotFound(StringResources.NenhumRegistroEncontrado);
